@@ -1,4 +1,4 @@
-from flask import Flask, request, send_from_directory, jsonify
+from flask import Flask, request, send_from_directory, jsonify, Response
 import os
 import json
 
@@ -14,7 +14,15 @@ os.makedirs(FILE_PATH, exist_ok=True)
 @app.route('/download', methods=['GET'])
 def download_file():
     try:
-        return send_from_directory(FILE_PATH, FILE_NAME, as_attachment=True, mimetype='application/octet-stream')
+        response = send_from_directory(
+            FILE_PATH, 
+            FILE_NAME, 
+            as_attachment=True, 
+            mimetype='application/octet-stream'  # Correct binary type
+        )
+        # Set Content-Disposition header to force correct file extension
+        response.headers["Content-Disposition"] = f"attachment; filename={FILE_NAME}"
+        return response
     except FileNotFoundError:
         return jsonify({"status": "error", "message": f"{FILE_NAME} not found"}), 404
 
